@@ -6,16 +6,14 @@ const initialState = {
   celebrities: []
 };
 
-export const getCelebrities = createAsyncThunk("celebrity/getCelebrity", async (pageno:number) => {
-  const { data } = await axios.get(`/celebrities?_page=${pageno}&_limit=7`);
-  console.log(data,"data.....");
+export const getCelebrities = createAsyncThunk("celebrity/getCelebrity", async () => {
+  const { data } = await axios.get(`/celebrities`);
   return data;
 });
 
 export const searchCelebrities = createAsyncThunk("celebrity/searchCelebrity", async (searchtext:any) => {
   console.log(searchtext);
   const { data } = await axios.get(`/celebrities?q=${searchtext}`);
-  console.log(data,"data.....");
   return data;
 });
 
@@ -49,7 +47,9 @@ export const celebritySlice = createSlice({
         const res_obj = {}
         state.celebrities.map(e => curr_state_obj[e._id] = e)
         action.payload.map(e => res_obj[e._id] = e)
-        state.celebrities = Object.values(Object.assign(curr_state_obj,res_obj)) ;
+
+        // state.celebrities = Object.values(Object.assign(curr_state_obj,res_obj)) ;
+        state.celebrities = action.payload
       },
       [searchCelebrities.rejected]: (state, action) => {
         state.status = "failed";

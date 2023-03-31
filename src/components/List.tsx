@@ -6,56 +6,46 @@ import ListItem from "./ListItem";
 import TextField from "@mui/material/TextField";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { getCelebrities,searchCelebrities } from "../redux/celebritySlice";
+import { getCelebrities, searchCelebrities } from "../redux/celebritySlice";
 import useLazyFetch from "../hooks/useLazyFetch";
 import { useMemo } from "react";
 import { width } from "@mui/system";
 import Celebrity from "../interfaces";
 import { AppDispatch } from "../redux/store";
-
+import useDebounce from "../hooks/useDebounceInput";
 
 interface CelebrityProps {
   celebrities: Celebrity[];
 }
 
-const List  = () => {
+const List = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { status, celebrities } = useSelector(
     (state: RootState) => state.celebrity
   );
-  
 
-  const { loading, loadMoreRef } = useLazyFetch(getCelebrities);
   const [searchinput, setSearchInput] = useState("");
+  const debouncedValue = useDebounce<string>(searchinput, 1000);
 
   useEffect(() => {
-      dispatch(searchCelebrities(searchinput))
-  }, [searchinput])
-  
+    dispatch(getCelebrities());
+  }, []);
 
-  const renderedCelebritiesList = useMemo(
-    () =>
-      celebrities.map((celebrity:Celebrity) => {
-        return <ListItem key={celebrity._id.toString()} 
-        _id={celebrity._id}
-        first={celebrity.first}
-        last={celebrity.last}
-        dob={celebrity.dob}
-        gender={celebrity.gender}
-        email={celebrity.email}
-        picture={celebrity.picture}
-        country={celebrity.country}
-        description={celebrity.description}
-        />;
-      }),
-    [celebrities]
-  );
+  useEffect(() => {
+    if (searchinput.length > 2) {
+      dispatch(searchCelebrities(searchinput));
+    }
+
+    return () => {
+      dispatch(getCelebrities());
+    };
+  }, [debouncedValue]);
 
   return (
     <>
       <Grid item xs={0} md={3} sm={3}></Grid>
       <Grid item xs={12} md={6} sm={6}>
-      <TextField
+        <TextField
           id="outlined-basic"
           label="Search"
           variant="outlined"
@@ -65,21 +55,30 @@ const List  = () => {
             position: "fixed",
             top: "10",
             zIndex: "100",
-            backgroundColor:" white"
+            backgroundColor: " white",
           }}
           value={searchinput}
           onChange={(e) => setSearchInput(e.target.value)}
         />
-
       </Grid>
       <Grid item xs={0} md={3} sm={3}></Grid>
       <Grid item xs={0} md={3} sm={3}></Grid>
       <Grid item xs={12} md={6} sm={6}>
-   
-
-        <div style={{marginTop:"150px"}}>
-          {renderedCelebritiesList}
-          <div ref={loadMoreRef}>{loading && <p>loading...</p>}</div>
+        <div style={{ marginTop: "150px" }}>
+          {celebrities.map((celebrity: Celebrity) => (
+            <ListItem
+              key={celebrity._id.toString()}
+              _id={celebrity._id}
+              first={celebrity.first}
+              last={celebrity.last}
+              dob={celebrity.dob}
+              gender={celebrity.gender}
+              email={celebrity.email}
+              picture={celebrity.picture}
+              country={celebrity.country}
+              description={celebrity.description}
+            />
+          ))}
         </div>
       </Grid>
       <Grid item xs={0} md={3} sm={3}></Grid>
