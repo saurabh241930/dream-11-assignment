@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Accordion from "@mui/material/Accordion";
@@ -10,14 +10,25 @@ import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Celebrity from "../interfaces";
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
+import { Input, TextField } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import IconButton from "@mui/material/IconButton";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+const CustomTextField = styled(TextField)({
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": {
+      borderColor: "red",
+    },
+    "&:hover fieldset": {
+      borderColor: "yellow",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "green",
+    },
+  },
+});
 
 const ListItem = ({
   _id,
@@ -29,7 +40,19 @@ const ListItem = ({
   picture,
   country,
   description,
-}: Celebrity) => {
+  
+}: Celebrity,handleDeleteModal:Function) => {
+  const [editable, setEditable] = useState(false);
+
+  const [firtsValue, setFirstValue] = useState(first);
+  const [lastValue, setLastValue] = useState(last);
+  const [dobValue, setDOBValue] = useState(dob);
+  const [genderValue, setGenderValue] = useState(gender);
+  const [emailValue, setEmailValue] = useState(email);
+  const [pictureValue, setPictureValue] = useState(picture);
+  const [countryValue, setCountryValue] = useState(country);
+  const [descriptionValue, setDescriptionValue] = useState(description);
+
   return (
     <Accordion style={{ fontSize: "30px", padding: "20px", marginTop: "30px" }}>
       <AccordionSummary
@@ -39,7 +62,20 @@ const ListItem = ({
       >
         <Avatar src={picture} />
         <Typography variant="h5" style={{ paddingLeft: "10px" }}>
-          {`${first} ${last}`}
+          <CustomTextField
+            id="outlined-basic"
+            variant="outlined"
+            value={firtsValue}
+            onChange={(e) => setFirstValue(e.target.value)}
+            disabled={!editable}
+          />
+          <TextField
+            id="outlined-basic"
+            variant="outlined"
+            value={lastValue}
+            onChange={(e) => setLastValue(e.target.value)}
+            disabled={!editable}
+          />
         </Typography>
       </AccordionSummary>
 
@@ -49,21 +85,39 @@ const ListItem = ({
             <Typography>
               <span style={{ color: "grey" }}>Age</span>
               <br />
-              <span>18 yrs</span>
+              <TextField
+                id="outlined-basic"
+                variant="outlined"
+                value={dobValue}
+                onChange={(e) => setDOBValue(e.target.value)}
+                disabled={!editable}
+              />
             </Typography>
           </Grid>
           <Grid item xs={4}>
             <Typography>
               <span style={{ color: "grey" }}>Gender</span>
               <br />
-              <span>{gender}</span>
+              <TextField
+                id="outlined-basic"
+                variant="outlined"
+                value={genderValue}
+                onChange={(e) => setGenderValue(e.target.value)}
+                disabled={!editable}
+              />
             </Typography>
           </Grid>
           <Grid item xs={4}>
             <Typography>
               <span style={{ color: "grey" }}>Country</span>
               <br />
-              <span>{country}</span>
+              <TextField
+                id="outlined-basic"
+                variant="outlined"
+                value={countryValue}
+                onChange={(e) => setCountryValue(e.target.value)}
+                disabled={!editable}
+              />
             </Typography>
           </Grid>
 
@@ -71,20 +125,51 @@ const ListItem = ({
             <Typography>
               <span style={{ color: "grey" }}>Description</span>
               <br />
-              <span>{description}</span>
+              <TextField
+                id="outlined-basic"
+                style={{ border: "none" }}
+                variant="outlined"
+                value={descriptionValue}
+                onChange={(e) => setDescriptionValue(e.target.value)}
+                fullWidth
+                multiline
+                maxRows={4}
+                disabled={!editable}
+              />
             </Typography>
           </Grid>
 
-          <Grid item xs={12} >
-          <Stack direction="row" spacing={2} style={{float:"right"}}>
-            <Item>Edit</Item>
-            <Item>Delete</Item>
-          </Stack>
+          <Grid item xs={12}>
+            <Stack direction="row" spacing={2} style={{ float: "right" }}>
+              {editable ? (
+                <>
+                  <IconButton aria-label="delete" size="large">
+                    <CancelIcon fontSize="inherit" style={{ color: "red" }}  onClick={() => setEditable(false)}/>
+                  </IconButton>
+                  <IconButton aria-label="delete" size="large">
+                    <CheckCircleOutlineIcon
+                      fontSize="inherit"
+                      style={{ color: "green" }}
+                      onClick={() => setEditable(false)}
+                    />
+                  </IconButton>
+                </>
+              ) : (
+                <>
+                  <IconButton aria-label="delete" size="large" >
+                    <DeleteIcon fontSize="inherit" style={{ color: "red" }}/>
+                  </IconButton>
+                  <IconButton aria-label="delete" size="large" onClick={() => setEditable(true)}>
+                    <EditIcon fontSize="inherit" style={{ color: "blue" }} />
+                  </IconButton>
+                </>
+              )}
+            </Stack>
           </Grid>
-
         </Grid>
       </AccordionDetails>
     </Accordion>
+    
   );
 };
 

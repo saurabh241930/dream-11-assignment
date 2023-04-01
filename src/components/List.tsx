@@ -13,6 +13,8 @@ import { width } from "@mui/system";
 import Celebrity from "../interfaces";
 import { AppDispatch } from "../redux/store";
 import useDebounce from "../hooks/useDebounceInput";
+import { consumers } from "stream";
+import DeleteModal from "./DeleteModal";
 
 interface CelebrityProps {
   celebrities: Celebrity[];
@@ -20,12 +22,18 @@ interface CelebrityProps {
 
 const List = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const [openModal,setModal] = useState<boolean>(false)
   const { status, celebrities } = useSelector(
     (state: RootState) => state.celebrity
   );
 
   const [searchinput, setSearchInput] = useState("");
-  const debouncedValue = useDebounce<string>(searchinput, 1000);
+  const debouncedValue = useDebounce<string>(searchinput, 500);
+
+  const handleDeleteModal = (id:number) => {
+    console.log(id);
+    
+  }
 
   useEffect(() => {
     dispatch(getCelebrities());
@@ -40,6 +48,9 @@ const List = () => {
       dispatch(getCelebrities());
     };
   }, [debouncedValue]);
+
+
+
 
   return (
     <>
@@ -77,8 +88,10 @@ const List = () => {
               picture={celebrity.picture}
               country={celebrity.country}
               description={celebrity.description}
+              handleDeleteModal={handleDeleteModal}
             />
           ))}
+          <DeleteModal openModal={openModal}/>
         </div>
       </Grid>
       <Grid item xs={0} md={3} sm={3}></Grid>
