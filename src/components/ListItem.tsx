@@ -40,8 +40,12 @@ const ListItem = ({
   picture,
   country,
   description,
+  handleDeleteModalOpen,
+  idSelected
   
-}: Celebrity,handleDeleteModal:Function) => {
+}: Celebrity) => {
+
+  
   const [editable, setEditable] = useState(false);
 
   const [firtsValue, setFirstValue] = useState(first);
@@ -156,7 +160,7 @@ const ListItem = ({
                 </>
               ) : (
                 <>
-                  <IconButton aria-label="delete" size="large" >
+                  <IconButton aria-label="delete" size="large" onClick={() => handleDeleteModalOpen(_id)}>
                     <DeleteIcon fontSize="inherit" style={{ color: "red" }}/>
                   </IconButton>
                   <IconButton aria-label="delete" size="large" onClick={() => setEditable(true)}>

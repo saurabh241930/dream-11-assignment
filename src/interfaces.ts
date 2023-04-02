@@ -8,7 +8,8 @@ interface Celebrity {
   picture: string;
   country: string;
   description: string;
-  handleDeleteModal:Function
+  handleDeleteModalOpen:Function;
+  idSelected:number;
 }
 
 export default Celebrity

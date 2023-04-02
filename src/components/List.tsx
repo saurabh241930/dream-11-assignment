@@ -29,10 +29,18 @@ const List = () => {
 
   const [searchinput, setSearchInput] = useState("");
   const debouncedValue = useDebounce<string>(searchinput, 500);
+  const [modalSelected,setModalSelected] = useState<number>(0)
 
-  const handleDeleteModal = (id:number) => {
-    console.log(id);
+  function handleDeleteModalOpen(id:number) {
+    setModalSelected(id)
+    setModal(true)
     
+  }
+
+  function handleDeleteModalClose(){
+    console.log("CLOSE......");
+    
+    setModal(false)
   }
 
   useEffect(() => {
@@ -88,10 +96,11 @@ const List = () => {
               picture={celebrity.picture}
               country={celebrity.country}
               description={celebrity.description}
-              handleDeleteModal={handleDeleteModal}
+              handleDeleteModalOpen={handleDeleteModalOpen}
+              idSelected={modalSelected}
             />
           ))}
-          <DeleteModal openModal={openModal}/>
+          <DeleteModal openModal={openModal} handleDeleteModalClose={handleDeleteModalClose}/>
         </div>
       </Grid>
       <Grid item xs={0} md={3} sm={3}></Grid>
