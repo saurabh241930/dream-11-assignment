@@ -20,6 +20,7 @@ const style = {
 interface IModalProps {
   openModal: boolean;
   handleDeleteModalClose: Function;
+  onDelete:Function
 }
 
 const DeleteModal: React.FC<IModalProps> = (props: IModalProps) => {
@@ -36,7 +37,7 @@ const DeleteModal: React.FC<IModalProps> = (props: IModalProps) => {
             Are you sure you want to delete ?
           </Typography>
           <Stack direction="row" spacing={2} style={{ float: "right" }}>
-            <Button variant="contained" color="error">
+            <Button variant="contained" color="error" onClick={() => props.onDelete()}>
               Yes
             </Button>
             <Button

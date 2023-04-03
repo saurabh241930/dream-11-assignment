@@ -1,5 +1,5 @@
 interface Celebrity {
-  _id: string;
+  _id: number;
   first: string;
   last: string;
   dob: string;
@@ -10,6 +10,7 @@ interface Celebrity {
   description: string;
   handleDeleteModalOpen:Function;
   idSelected:number;
+  onAccordianSelect:Function
 }
 
 export default Celebrity

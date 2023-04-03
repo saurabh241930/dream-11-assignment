@@ -6,41 +6,48 @@ import ListItem from "./ListItem";
 import TextField from "@mui/material/TextField";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../redux/store";
-import { getCelebrities, searchCelebrities } from "../redux/celebritySlice";
+import {
+  getCelebrities,
+  searchCelebrities,
+  deleteCelebrity,
+} from "../redux/celebritySlice";
 import useLazyFetch from "../hooks/useLazyFetch";
 import { useMemo } from "react";
-import { width } from "@mui/system";
 import Celebrity from "../interfaces";
 import { AppDispatch } from "../redux/store";
 import useDebounce from "../hooks/useDebounceInput";
-import { consumers } from "stream";
 import DeleteModal from "./DeleteModal";
-
-interface CelebrityProps {
-  celebrities: Celebrity[];
-}
+import { CircularProgress, Typography } from "@mui/material";
+import BottomDrawer from "./BottomDrawer";
 
 const List = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [openModal,setModal] = useState<boolean>(false)
+  const [openModal, setModal] = useState<boolean>(false);
   const { status, celebrities } = useSelector(
     (state: RootState) => state.celebrity
   );
 
-  const [searchinput, setSearchInput] = useState("");
+  const [searchinput, setSearchInput] = useState<string>("");
   const debouncedValue = useDebounce<string>(searchinput, 500);
-  const [modalSelected,setModalSelected] = useState<number>(0)
+  const [modalSelected, setModalSelected] = useState<number>(0);
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
 
-  function handleDeleteModalOpen(id:number) {
-    setModalSelected(id)
-    setModal(true)
-    
+  function handleDeleteModalOpen(id: number) {
+    setModalSelected(id);
+    setModal(true);
   }
 
-  function handleDeleteModalClose(){
-    console.log("CLOSE......");
-    
-    setModal(false)
+  function handleAccordianSelected(id: number) {
+    setModalSelected(id);
+  }
+
+  function onDelete() {
+    dispatch(deleteCelebrity({ id: modalSelected }));
+    setModal(false);
+  }
+
+  function handleDeleteModalClose() {
+    setModal(false);
   }
 
   useEffect(() => {
@@ -57,8 +64,9 @@ const List = () => {
     };
   }, [debouncedValue]);
 
-
-
+  useEffect(() => {
+    setIsDesktop(window.innerWidth > 1450);
+  }, [window.innerWidth]);
 
   return (
     <>
@@ -98,10 +106,40 @@ const List = () => {
               description={celebrity.description}
               handleDeleteModalOpen={handleDeleteModalOpen}
               idSelected={modalSelected}
+              onAccordianSelect={handleAccordianSelected}
             />
           ))}
-          <DeleteModal openModal={openModal} handleDeleteModalClose={handleDeleteModalClose}/>
+          {isDesktop ? (
+            <DeleteModal
+              openModal={openModal}
+              handleDeleteModalClose={handleDeleteModalClose}
+              onDelete={onDelete}
+            />
+          ) : (
+            <BottomDrawer
+              openModal={openModal}
+              handleDeleteModalClose={handleDeleteModalClose}
+              onDelete={onDelete}
+            />
+          )}
         </div>
+        {status === "loading" && <CircularProgress size={20} color="primary" />}
+        {status === "searching" && (
+          <div>
+            <Typography>Searching please wait....../</Typography>
+          </div>
+        )}
+        {status === "failed" && (
+          <div>
+            <Typography>Something went wrong :/</Typography>
+          </div>
+        )}
+
+        {celebrities.length == 0 && (
+          <div>
+            <Typography>No data found</Typography>
+          </div>
+        )}
       </Grid>
       <Grid item xs={0} md={3} sm={3}></Grid>
     </>

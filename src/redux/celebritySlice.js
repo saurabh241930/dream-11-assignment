@@ -3,61 +3,72 @@ import axios from "axios";
 
 const initialState = {
   status: "idle",
-  celebrities: []
+  celebrities: [],
 };
 
-export const getCelebrities = createAsyncThunk("celebrity/getCelebrity", async () => {
-  const { data } = await axios.get(`/celebrities`);
-  return data;
-});
+export const getCelebrities = createAsyncThunk(
+  "celebrity/getCelebrity",
+  async () => {
+    const { data } = await axios.get(`/celebrities`);
+    return data;
+  }
+);
 
-export const searchCelebrities = createAsyncThunk("celebrity/searchCelebrity", async (searchtext:any) => {
-  console.log(searchtext);
-  const { data } = await axios.get(`/celebrities?q=${searchtext}`);
-  return data;
-});
+export const searchCelebrities = createAsyncThunk(
+  "celebrity/searchCelebrity",
+  async (searchtext: String) => {
+    const { data } = await axios.get(`/celebrities?q=${searchtext}`);
+    return data;
+  }
+);
 
 export const celebritySlice = createSlice({
-    name: "celebrity",
-    initialState,
-    reducers: {},
-    extraReducers: {
-      [getCelebrities.pending]: (state, action) => {
-        state.status = "loading";
-      },
-      [getCelebrities.fulfilled]: (state, action) => {
-        state.status = "success";
+  name: "celebrity",
+  initialState,
+  reducers: {
+    deleteCelebrity: (state, action) => {
+      const currCopy = [...state.celebrities];
+      const indexToRemove = currCopy.findIndex((object) => {
+        return object._id === action.payload.id;
+      });
+      currCopy.splice(indexToRemove, 1);
 
-        const curr_state_obj = {}
-        const res_obj = {}
-        state.celebrities.map(e => curr_state_obj[e._id] = e)
-        action.payload.map(e => res_obj[e._id] = e)
-        state.celebrities = Object.values(Object.assign(curr_state_obj,res_obj)) ;
-      },
-      [getCelebrities.rejected]: (state, action) => {
-        state.status = "failed";
-      },
-      [searchCelebrities.pending]: (state, action) => {
-        state.status = "loading";
-      },
-      [searchCelebrities.fulfilled]: (state, action) => {
-        state.status = "success";
-
-        const curr_state_obj = {}
-        const res_obj = {}
-        state.celebrities.map(e => curr_state_obj[e._id] = e)
-        action.payload.map(e => res_obj[e._id] = e)
-
-        // state.celebrities = Object.values(Object.assign(curr_state_obj,res_obj)) ;
-        state.celebrities = action.payload
-      },
-      [searchCelebrities.rejected]: (state, action) => {
-        state.status = "failed";
-      }
+      state.celebrities = currCopy;
     },
-  });
+  },
+  extraReducers: {
+    [getCelebrities.pending]: (state, action) => {
+      state.status = "loading";
+    },
+    [getCelebrities.fulfilled]: (state, action) => {
+      state.status = "success";
 
+      const curr_state_obj = {};
+      const res_obj = {};
+      state.celebrities.map((e) => (curr_state_obj[e._id] = e));
+      action.payload.map((e) => (res_obj[e._id] = e));
+      state.celebrities = Object.values(Object.assign(curr_state_obj, res_obj));
+    },
+    [getCelebrities.rejected]: (state, action) => {
+      state.status = "failed";
+    },
+    [searchCelebrities.pending]: (state, action) => {
+      state.status = "searching";
+    },
+    [searchCelebrities.fulfilled]: (state, action) => {
+      state.status = "success";
 
-  export default celebritySlice.reducer;
+      const curr_state_obj = {};
+      const res_obj = {};
+      state.celebrities.map((e) => (curr_state_obj[e._id] = e));
+      action.payload.map((e) => (res_obj[e._id] = e));
+      state.celebrities = action.payload;
+    },
+    [searchCelebrities.rejected]: (state, action) => {
+      state.status = "failed";
+    },
+  },
+});
 
-  
+export default celebritySlice.reducer;
+export const { deleteCelebrity } = celebritySlice.actions;

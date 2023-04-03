@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Accordion from "@mui/material/Accordion";
@@ -10,25 +10,14 @@ import Grid from "@mui/material/Grid";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import Celebrity from "../interfaces";
-import { Input, TextField } from "@mui/material";
+import { Input, InputLabel, MenuItem, TextField } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-const CustomTextField = styled(TextField)({
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderColor: "red",
-    },
-    "&:hover fieldset": {
-      borderColor: "yellow",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "green",
-    },
-  },
-});
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import moment from "moment";
 
 const ListItem = ({
   _id,
@@ -41,11 +30,9 @@ const ListItem = ({
   country,
   description,
   handleDeleteModalOpen,
-  idSelected
-  
+  onAccordianSelect,
+  idSelected,
 }: Celebrity) => {
-
-  
   const [editable, setEditable] = useState(false);
 
   const [firtsValue, setFirstValue] = useState(first);
@@ -56,9 +43,26 @@ const ListItem = ({
   const [pictureValue, setPictureValue] = useState(picture);
   const [countryValue, setCountryValue] = useState(country);
   const [descriptionValue, setDescriptionValue] = useState(description);
+  const [validationError, setValidationError] = useState("");
+
+
+  useEffect(() => {
+    if (
+      (first.length > 0 && firtsValue.length === 0) ||
+      (last.length > 0 && lastValue.length === 0) ||
+      (country.length > 0 && countryValue.length === 0) ||
+      (description.length > 0 && descriptionValue.length === 0)
+    ) {
+      setValidationError("Values cannot be empty");
+    } else {
+      setValidationError("");
+    }
+  }, [firtsValue, lastValue, countryValue, descriptionValue]);
+
+
 
   return (
-    <Accordion style={{ fontSize: "30px", padding: "20px", marginTop: "30px" }}>
+    <Accordion style={{ fontSize: "30px", padding: "20px", marginTop: "30px" }} onClick={() => onAccordianSelect(_id)} expanded={_id === idSelected}>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="panel1a-content"
@@ -66,12 +70,13 @@ const ListItem = ({
       >
         <Avatar src={picture} />
         <Typography variant="h5" style={{ paddingLeft: "10px" }}>
-          <CustomTextField
+          <TextField
             id="outlined-basic"
             variant="outlined"
             value={firtsValue}
             onChange={(e) => setFirstValue(e.target.value)}
             disabled={!editable}
+            error={firtsValue.length === 0}
           />
           <TextField
             id="outlined-basic"
@@ -79,6 +84,7 @@ const ListItem = ({
             value={lastValue}
             onChange={(e) => setLastValue(e.target.value)}
             disabled={!editable}
+            error={lastValue.length === 0}
           />
         </Typography>
       </AccordionSummary>
@@ -92,9 +98,9 @@ const ListItem = ({
               <TextField
                 id="outlined-basic"
                 variant="outlined"
-                value={dobValue}
+                value={moment().diff(dobValue, "years")}
                 onChange={(e) => setDOBValue(e.target.value)}
-                disabled={!editable}
+                disabled
               />
             </Typography>
           </Grid>
@@ -102,13 +108,21 @@ const ListItem = ({
             <Typography>
               <span style={{ color: "grey" }}>Gender</span>
               <br />
-              <TextField
-                id="outlined-basic"
-                variant="outlined"
+
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
                 value={genderValue}
-                onChange={(e) => setGenderValue(e.target.value)}
+                label="Age"
                 disabled={!editable}
-              />
+                onChange={(e) => setGenderValue(e.target.value)}
+              >
+                <MenuItem value="male">Male</MenuItem>
+                <MenuItem value="female">Female</MenuItem>
+                <MenuItem value="transgender">Transgender</MenuItem>
+                <MenuItem value="rather not to say">Rather not to say</MenuItem>
+                <MenuItem value="other">Other</MenuItem>
+              </Select>
             </Typography>
           </Grid>
           <Grid item xs={4}>
@@ -121,6 +135,7 @@ const ListItem = ({
                 value={countryValue}
                 onChange={(e) => setCountryValue(e.target.value)}
                 disabled={!editable}
+                error={countryValue.length === 0}
               />
             </Typography>
           </Grid>
@@ -139,18 +154,28 @@ const ListItem = ({
                 multiline
                 maxRows={4}
                 disabled={!editable}
+                error={descriptionValue.length === 0}
               />
             </Typography>
           </Grid>
 
           <Grid item xs={12}>
             <Stack direction="row" spacing={2} style={{ float: "right" }}>
-              {editable ? (
+              {editable && moment().diff(dobValue, "years") > 18 ? (
                 <>
                   <IconButton aria-label="delete" size="large">
-                    <CancelIcon fontSize="inherit" style={{ color: "red" }}  onClick={() => setEditable(false)}/>
+                    <CancelIcon
+                      fontSize="inherit"
+                      style={{ color: "red" }}
+                      onClick={() => setEditable(false)}
+                    />
                   </IconButton>
-                  <IconButton aria-label="delete" size="large">
+                  <span>{validationError}</span>
+                  <IconButton
+                    aria-label="delete"
+                    size="large"
+                    disabled={validationError.length > 0}
+                  >
                     <CheckCircleOutlineIcon
                       fontSize="inherit"
                       style={{ color: "green" }}
@@ -160,10 +185,22 @@ const ListItem = ({
                 </>
               ) : (
                 <>
-                  <IconButton aria-label="delete" size="large" onClick={() => handleDeleteModalOpen(_id)}>
-                    <DeleteIcon fontSize="inherit" style={{ color: "red" }}/>
+                  {moment().diff(dobValue, "years") < 18 && (
+                    <span>Non adult</span>
+                  )}
+                  <IconButton
+                    aria-label="delete"
+                    size="large"
+                    onClick={() => handleDeleteModalOpen(_id)}
+                  >
+                    <DeleteIcon fontSize="inherit" style={{ color: "red" }} />
                   </IconButton>
-                  <IconButton aria-label="delete" size="large" onClick={() => setEditable(true)}>
+                  <IconButton
+                    aria-label="delete"
+                    size="large"
+                    onClick={() => setEditable(true)}
+                    disabled={moment().diff(dobValue, "years") < 18}
+                  >
                     <EditIcon fontSize="inherit" style={{ color: "blue" }} />
                   </IconButton>
                 </>
@@ -173,7 +210,6 @@ const ListItem = ({
         </Grid>
       </AccordionDetails>
     </Accordion>
-    
   );
 };
 
